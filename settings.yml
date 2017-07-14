@@ -14,7 +14,7 @@ saved_presets:
   ccard_num: ''
   auth_code: UAT
   web_pin: ''
-- name: Standard Consumer (UNAUTH)
+- name: Standard Consumer Unauth
   member_type: Full Member Consumer
   source_code: WPUN
   ccard_type: VS

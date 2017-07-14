@@ -180,7 +180,11 @@ class MainWidget < Qt::Widget
 
 	def change_preset_name
 		d = Qt::Dialog.new
+		d.windowTitle = 'Edit preset'
 		@change_preset_name_dialog = d
+
+		input_label = Qt::Label.new 'Name:', d
+
 		input = Qt::LineEdit.new d
 		input.text = @presets.selectedItems[0].text
 		@change_preset_name_input = input
@@ -190,10 +194,11 @@ class MainWidget < Qt::Widget
 		delete_btn = Qt::PushButton.new 'Delete', d
 		connect(delete_btn, SIGNAL('clicked()'), self, SLOT('delete_preset()'))
 
-		d.layout = Qt::VBoxLayout.new do |l|
-			l.addWidget(input)
-			l.addWidget(btn)
-			l.addWidget(delete_btn)
+		d.layout = Qt::GridLayout.new do |l|
+			l.addWidget input_label, 0, 0
+			l.addWidget input,		 0, 1, 1, 2
+			l.addWidget btn,		 1, 1
+			l.addWidget delete_btn,	 1, 2
 		end
 
 		d.show
