@@ -1,0 +1,23 @@
+---
+saved_presets:
+- name: Standard Consumer
+  member_type: Full Member Consumer
+  source_code: WPUN
+  ccard_type: VS
+  ccard_num: 4444333322221111
+  auth_code: UAT
+  web_pin: 1234
+- name: Hybrid Associate Consumer
+  member_type: Hybrid Associate Consumer
+  source_code: VISAPRISMA001
+  ccard_type: VS
+  ccard_num: ''
+  auth_code: UAT
+  web_pin: ''
+- name: Standard Consumer (UNAUTH)
+  member_type: Full Member Consumer
+  source_code: WPUN
+  ccard_type: VS
+  ccard_num: 4444333322221111
+  auth_code: ''
+  web_pin: 1234

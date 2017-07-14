@@ -1,0 +1,6 @@
+---
+env:
+  url: https://website-url.com/ppass/
+user:
+  username: username
+  password: password
