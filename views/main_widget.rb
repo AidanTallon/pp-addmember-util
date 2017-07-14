@@ -85,33 +85,52 @@ class MainWidget < Qt::Widget
 
 		@web_pin.text = '1234'
 
-		layout = Qt::GridLayout.new
+		layout = Qt::GridLayout.new do |l|
+			selectors = Qt::GridLayout.new
 
-		layout.addWidget presets_label, 	0, 0
-		layout.addWidget @presets, 			1, 0
+			presets = Qt::VBoxLayout.new
+			presets.addWidget presets_label
+			presets.addWidget @presets
+			selectors.addLayout presets, 0, 0
 
-		layout.addWidget mem_type_label,    0, 1
-		layout.addWidget @member_type,      1, 1
+			mem_type = Qt::VBoxLayout.new
+			mem_type.addWidget mem_type_label
+			mem_type.addWidget @member_type
+			selectors.addLayout mem_type, 0, 1
 
-		layout.addWidget source_code_label, 0, 2
-		layout.addWidget @source_code,      1, 2, Qt::AlignTop
+			source_code = Qt::VBoxLayout.new
+			source_code.addWidget source_code_label
+			source_code.addWidget @source_code
+			selectors.addLayout source_code, 0, 2, Qt::AlignTop
 
-		layout.addWidget card_type_label, 	0, 3
-		layout.addWidget @card_type, 		1, 3
+			card_type = Qt::VBoxLayout.new
+			card_type.addWidget card_type_label
+			card_type.addWidget @card_type
+			selectors.addLayout card_type, 0, 3
 
-		layout.addWidget card_num_label, 	0, 4
-		layout.addWidget @card_number, 		1, 4, Qt::AlignTop
+			card_num = Qt::VBoxLayout.new
+			card_num.addWidget card_num_label
+			card_num.addWidget @card_number
+			selectors.addLayout card_num, 0, 4, Qt::AlignTop
 
-		layout.addWidget auth_code_label, 	0, 5
-		layout.addWidget @auth_code, 		1, 5, Qt::AlignTop
+			auth_code = Qt::VBoxLayout.new
+			auth_code.addWidget auth_code_label
+			auth_code.addWidget @auth_code
+			selectors.addLayout auth_code, 0, 5, Qt::AlignTop
 
-		layout.addWidget web_pin_label, 	0, 6
-		layout.addWidget @web_pin, 			1, 6, Qt::AlignTop
+			web_pin = Qt::VBoxLayout.new
+			web_pin.addWidget web_pin_label
+			web_pin.addWidget @web_pin
+			selectors.addLayout web_pin, 0, 6, Qt::AlignTop
 
-		layout.addWidget login_button,		0, 7
-		layout.addWidget add_mem_button, 	1, 7
-		layout.addWidget save_preset_button, 2, 7
+			buttons = Qt::VBoxLayout.new
+			buttons.addWidget login_button
+			buttons.addWidget add_mem_button
 
+			l.addLayout selectors, 0, 0
+			l.addLayout buttons, 0, 1, Qt::AlignTop
+			l.addWidget save_preset_button, 1, 1
+		end
 		setLayout layout
 	end
 
