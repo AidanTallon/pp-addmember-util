@@ -1,8 +1,23 @@
 class MainWidget < Qt::Widget
 	attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin
 
-	signals 'clicked()', 'currentItemChanged()', 'itemDoubleClicked()'
-	slots 'add_member()', 'load_preset()', 'login()', 'save_preset()', 'change_preset_name()', 'save_preset_name()', 'delete_preset()', 'kill_chrome()'
+	signals 'clicked()',
+					'currentItemChanged()',
+					'itemDoubleClicked()'
+
+	slots 'add_member()',
+				'load_preset()',
+				'login()',
+				'save_preset()',
+				'change_preset_name()',
+				'save_preset_name()',
+				'delete_preset()',
+				'kill_chrome()',
+				'refresh_mem_list()',
+				'delete_mem_list()',
+				'clear_mem_list()'
+
+	@lock = Mutex.new
 
 	def initialize(parent)
 		super parent
@@ -85,6 +100,17 @@ class MainWidget < Qt::Widget
 
 		@web_pin.text = '1234'
 
+		@member_list = MemberList.new
+
+		@refresh_mem_list_button = Qt::PushButton.new 'Refresh', self
+		connect(@refresh_mem_list_button, SIGNAL('clicked()'), self, SLOT('refresh_mem_list()'))
+
+		@clear_mem_list_button = Qt::PushButton.new 'Clear', self
+		connect(@clear_mem_list_button, SIGNAL('clicked()'), self, SLOT('clear_mem_list()'))
+
+		@delete_mem_list_button = Qt::PushButton.new 'Delete', self
+		connect(@delete_mem_list_button, SIGNAL('clicked()'), self, SLOT('delete_mem_list()'))
+
 		layout = Qt::GridLayout.new do |l|
 			selectors = Qt::GridLayout.new
 
@@ -130,6 +156,11 @@ class MainWidget < Qt::Widget
 			l.addLayout selectors, 0, 0, 5, 4
 			l.addLayout buttons, 0, 4, Qt::AlignTop
 			l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
+
+			l.addWidget @member_list, 0, 5
+			l.addWidget @refresh_mem_list_button, 0, 6
+			l.addWidget @delete_mem_list_button, 1, 6
+			l.addWidget @clear_mem_list_button, 2, 6
 		end
 		setLayout layout
 	end
@@ -146,7 +177,15 @@ class MainWidget < Qt::Widget
 		password = EnvConfig.user['password']
 		url = EnvConfig.url
 
-		Thread.new { Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode) }
+		member = MemberLog.new
+
+		semaphore = Mutex.new
+
+		Thread.new do
+			semaphore.synchronize do
+				Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode, member)
+			end
+		end
 	end
 
 	def login
@@ -243,5 +282,22 @@ class MainWidget < Qt::Widget
 		File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
 		@change_preset_name_dialog.close
 		@presets.takeItem(@presets.currentRow)
+	end
+
+	def refresh_mem_list
+		@member_list.refresh
+	end
+
+	def delete_mem_list
+		member_name = @member_list.selectedItems[0].text
+		MemberLog.all.delete_if do |m|
+			(m.first_name + ' ' + m.last_name + ' - ' + m.consumer_number) == member_name
+		end
+		@member_list.takeItem(@member_list.currentRow)
+	end
+
+	def clear_mem_list
+		@member_list.clear
+		MemberLog.all.clear
 	end
 end
