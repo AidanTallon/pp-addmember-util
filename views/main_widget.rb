@@ -91,45 +91,45 @@ class MainWidget < Qt::Widget
 			presets = Qt::VBoxLayout.new
 			presets.addWidget presets_label
 			presets.addWidget @presets
-			selectors.addLayout presets, 0, 0
+			selectors.addLayout presets, 0, 0, 4, 1
 
 			mem_type = Qt::VBoxLayout.new
 			mem_type.addWidget mem_type_label
 			mem_type.addWidget @member_type
-			selectors.addLayout mem_type, 0, 1
-
-			source_code = Qt::VBoxLayout.new
-			source_code.addWidget source_code_label
-			source_code.addWidget @source_code
-			selectors.addLayout source_code, 0, 2, Qt::AlignTop
+			selectors.addLayout mem_type, 0, 1, 4, 1
 
 			card_type = Qt::VBoxLayout.new
 			card_type.addWidget card_type_label
 			card_type.addWidget @card_type
-			selectors.addLayout card_type, 0, 3
+			selectors.addLayout card_type, 0, 2, 4, 1
+
+			source_code = Qt::VBoxLayout.new
+			source_code.addWidget source_code_label
+			source_code.addWidget @source_code
+			selectors.addLayout source_code, 0, 3, Qt::AlignTop
 
 			card_num = Qt::VBoxLayout.new
 			card_num.addWidget card_num_label
 			card_num.addWidget @card_number
-			selectors.addLayout card_num, 0, 4, Qt::AlignTop
+			selectors.addLayout card_num, 1, 3, Qt::AlignTop
 
 			auth_code = Qt::VBoxLayout.new
 			auth_code.addWidget auth_code_label
 			auth_code.addWidget @auth_code
-			selectors.addLayout auth_code, 0, 5, Qt::AlignTop
+			selectors.addLayout auth_code, 2, 3, Qt::AlignTop
 
 			web_pin = Qt::VBoxLayout.new
 			web_pin.addWidget web_pin_label
 			web_pin.addWidget @web_pin
-			selectors.addLayout web_pin, 0, 6, Qt::AlignTop
+			selectors.addLayout web_pin, 3, 3, Qt::AlignTop
 
 			buttons = Qt::VBoxLayout.new
 			buttons.addWidget login_button
 			buttons.addWidget add_mem_button
 
-			l.addLayout selectors, 0, 0
-			l.addLayout buttons, 0, 1, Qt::AlignTop
-			l.addWidget save_preset_button, 1, 1
+			l.addLayout selectors, 0, 0, 5, 4
+			l.addLayout buttons, 0, 4, Qt::AlignTop
+			l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
 		end
 		setLayout layout
 	end
