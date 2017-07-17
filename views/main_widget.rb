@@ -2,7 +2,7 @@ class MainWidget < Qt::Widget
 	attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin
 
 	signals 'clicked()', 'currentItemChanged()', 'itemDoubleClicked()'
-	slots 'add_member()', 'load_preset()', 'login()', 'save_preset()', 'change_preset_name()', 'save_preset_name()', 'delete_preset()'
+	slots 'add_member()', 'load_preset()', 'login()', 'save_preset()', 'change_preset_name()', 'save_preset_name()', 'delete_preset()', 'kill_chrome()'
 
 	def initialize(parent)
 		super parent
