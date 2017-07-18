@@ -4,7 +4,9 @@ class MainWidget < Qt::Widget
 	signals 'clicked()',
 					'currentItemChanged()',
 					'itemDoubleClicked()',
-					'show_error(const QString&)'
+					'show_error(const QString&)',
+					'update_mem_list()',
+					'update_loading_widget()'
 
 	slots 'add_member()',
 				'load_preset()',
@@ -14,7 +16,13 @@ class MainWidget < Qt::Widget
 				'save_preset_name()',
 				'delete_preset()',
 				'kill_chrome()',
-				'on_show_error(const QString&)'
+				'on_show_error(const QString&)',
+				'refresh_mem_list()',
+				'delete_mem_list()',
+				'clear_mem_list()',
+				'on_update_loading_widget()'
+
+	@lock = Mutex.new
 
 	def initialize(parent)
 		super parent
@@ -97,6 +105,16 @@ class MainWidget < Qt::Widget
 
 		@web_pin.text = '1234'
 
+		@member_list = MemberList.new
+
+		@clear_mem_list_button = Qt::PushButton.new 'Clear', self
+		connect(@clear_mem_list_button, SIGNAL('clicked()'), self, SLOT('clear_mem_list()'))
+
+		@delete_mem_list_button = Qt::PushButton.new 'Delete', self
+		connect(@delete_mem_list_button, SIGNAL('clicked()'), self, SLOT('delete_mem_list()'))
+
+		@loading_widget = Qt::Label.new 'adding member...', self
+
 		layout = Qt::GridLayout.new do |l|
 			selectors = Qt::GridLayout.new
 
@@ -142,10 +160,21 @@ class MainWidget < Qt::Widget
 			l.addLayout selectors, 0, 0, 5, 4
 			l.addLayout buttons, 0, 4, Qt::AlignTop
 			l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
+
+			l.addWidget @member_list, 0, 5, 5, 1
+			l.addWidget @loading_widget, 0, 6, Qt::AlignTop
+			@loading_widget.hide
+			l.addWidget @delete_mem_list_button, 3, 6
+			l.addWidget @clear_mem_list_button, 4, 6
 		end
 		setLayout layout
 
 		connect self, SIGNAL('show_error(const QString&)'), self, SLOT('on_show_error(const QString&)')
+		connect self, SIGNAL('update_mem_list()'), self, SLOT('refresh_mem_list()')
+
+		connect self, SIGNAL('update_loading_widget()'), self, SLOT('on_update_loading_widget()')
+
+		@adding_member = 0
 	end
 
 	def add_member
@@ -160,17 +189,37 @@ class MainWidget < Qt::Widget
 		password = EnvConfig.user['password']
 		url = EnvConfig.url
 
+		member = MemberLog.new
+
+		semaphore = Mutex.new
+
 		Thread.new do
-			begin
-				Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode)
-			rescue Exception => e
-				emit show_error "#{e}"
+			semaphore.synchronize do
+
+				@adding_member += 1
+				emit update_loading_widget()
+
+				begin
+					Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode, member)
+				rescue Exception => e
+					emit show_error "#{e}"
+				end
+				
+				emit update_mem_list()
+				@adding_member -= 1
+				emit update_loading_widget()
 			end
 		end
 	end
 
+
 	def on_show_error(msg)
 		Qt::ErrorMessage.new.showMessage(msg)
+	end
+
+	def on_update_loading_widget
+		@loading_widget.hide if @adding_member == 0
+		@loading_widget.show if @adding_member > 0
 	end
 
 	def login
@@ -273,5 +322,22 @@ class MainWidget < Qt::Widget
 		File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
 		@change_preset_name_dialog.close
 		@presets.takeItem(@presets.currentRow)
+	end
+
+	def refresh_mem_list
+		@member_list.refresh
+	end
+
+	def delete_mem_list
+		member_name = @member_list.selectedItems[0].text
+		MemberLog.all.delete_if do |m|
+			(m.first_name + ' ' + m.last_name + ' - ' + m.consumer_number) == member_name
+		end
+		@member_list.takeItem(@member_list.currentRow)
+	end
+
+	def clear_mem_list
+		@member_list.clear
+		MemberLog.all.clear
 	end
 end
