@@ -11,6 +11,7 @@ class Browser
 		@driver.frame(name: 'ContentFrame').frame(name: 'ActiveAreaFrame').text_field(id: 'UserName').set username
 		@driver.frame(name: 'ContentFrame').frame(name: 'ActiveAreaFrame').text_field(type: 'password').set(pass)
 		@driver.frame(name: 'ContentFrame').frame(name: 'ActiveAreaFrame').text_field(type: 'password').send_keys :enter
+		raise ArgumentError, 'Error logging in' if @driver.alert.exists?
 		return self
 	end
 

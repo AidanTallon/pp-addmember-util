@@ -1,8 +1,20 @@
 class MainWidget < Qt::Widget
 	attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin
 
-	signals 'clicked()', 'currentItemChanged()', 'itemDoubleClicked()'
-	slots 'add_member()', 'load_preset()', 'login()', 'save_preset()', 'change_preset_name()', 'save_preset_name()', 'delete_preset()', 'kill_chrome()'
+	signals 'clicked()',
+					'currentItemChanged()',
+					'itemDoubleClicked()',
+					'show_error(const QString&)'
+
+	slots 'add_member()',
+				'load_preset()',
+				'login()',
+				'save_preset()',
+				'change_preset_name()',
+				'save_preset_name()',
+				'delete_preset()',
+				'kill_chrome()',
+				'on_show_error(const QString&)'
 
 	def initialize(parent)
 		super parent
@@ -132,6 +144,8 @@ class MainWidget < Qt::Widget
 			l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
 		end
 		setLayout layout
+
+		connect self, SIGNAL('show_error(const QString&)'), self, SLOT('on_show_error(const QString&)')
 	end
 
 	def add_member
@@ -146,7 +160,17 @@ class MainWidget < Qt::Widget
 		password = EnvConfig.user['password']
 		url = EnvConfig.url
 
-		Thread.new { Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode) }
+		Thread.new do
+			begin
+				Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode)
+			rescue Exception => e
+				emit show_error "#{e}"
+			end
+		end
+	end
+
+	def on_show_error(msg)
+		Qt::ErrorMessage.new.showMessage(msg)
 	end
 
 	def login
@@ -154,7 +178,13 @@ class MainWidget < Qt::Widget
 		password = EnvConfig.user['password']
 		url = EnvConfig.url
 
-		Thread.new { Browser.new(url).login(username, password) }
+		Thread.new do
+			begin
+				Browser.new(url).login(username, password)
+			rescue Exception => e
+				emit show_error "#{e}"
+			end
+		end
 	end
 
 	def load_preset
