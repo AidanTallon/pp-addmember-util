@@ -3,7 +3,9 @@ class MainWidget < Qt::Widget
 
 	signals 'clicked()',
 					'currentItemChanged()',
-					'itemDoubleClicked()'
+					'itemDoubleClicked()',
+					'update_mem_list()',
+					'update_loading_widget()'
 
 	slots 'add_member()',
 				'load_preset()',
@@ -15,7 +17,8 @@ class MainWidget < Qt::Widget
 				'kill_chrome()',
 				'refresh_mem_list()',
 				'delete_mem_list()',
-				'clear_mem_list()'
+				'clear_mem_list()',
+				'on_update_loading_widget()'
 
 	@lock = Mutex.new
 
@@ -102,14 +105,13 @@ class MainWidget < Qt::Widget
 
 		@member_list = MemberList.new
 
-		@refresh_mem_list_button = Qt::PushButton.new 'Refresh', self
-		connect(@refresh_mem_list_button, SIGNAL('clicked()'), self, SLOT('refresh_mem_list()'))
-
 		@clear_mem_list_button = Qt::PushButton.new 'Clear', self
 		connect(@clear_mem_list_button, SIGNAL('clicked()'), self, SLOT('clear_mem_list()'))
 
 		@delete_mem_list_button = Qt::PushButton.new 'Delete', self
 		connect(@delete_mem_list_button, SIGNAL('clicked()'), self, SLOT('delete_mem_list()'))
+
+		@loading_widget = Qt::Label.new 'adding member...', self
 
 		layout = Qt::GridLayout.new do |l|
 			selectors = Qt::GridLayout.new
@@ -157,12 +159,19 @@ class MainWidget < Qt::Widget
 			l.addLayout buttons, 0, 4, Qt::AlignTop
 			l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
 
-			l.addWidget @member_list, 0, 5
-			l.addWidget @refresh_mem_list_button, 0, 6
-			l.addWidget @delete_mem_list_button, 1, 6
-			l.addWidget @clear_mem_list_button, 2, 6
+			l.addWidget @member_list, 0, 5, 5, 1
+			l.addWidget @loading_widget, 0, 6, Qt::AlignTop
+			@loading_widget.hide
+			l.addWidget @delete_mem_list_button, 3, 6
+			l.addWidget @clear_mem_list_button, 4, 6
 		end
 		setLayout layout
+
+		connect self, SIGNAL('update_mem_list()'), self, SLOT('refresh_mem_list()')
+
+		connect self, SIGNAL('update_loading_widget()'), self, SLOT('on_update_loading_widget()')
+
+		@adding_member = 0
 	end
 
 	def add_member
@@ -183,9 +192,19 @@ class MainWidget < Qt::Widget
 
 		Thread.new do
 			semaphore.synchronize do
+				@adding_member += 1
+				emit update_loading_widget()
 				Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode, member)
+				emit update_mem_list()
+				@adding_member -= 1
+				emit update_loading_widget()
 			end
 		end
+	end
+
+	def on_update_loading_widget
+		@loading_widget.hide if @adding_member == 0
+		@loading_widget.show if @adding_member > 0
 	end
 
 	def login
