@@ -315,6 +315,7 @@ class MainWidget < Qt::Widget
   end
 
   def delete_preset
+    return if @presets.selectedItems[0].nil?
     yaml_file = YAML.load(File.new('./settings.yml'))
     all_presets = yaml_file['saved_presets']
     all_presets.delete_if { |p| p['name'] == @presets.selectedItems[0].text }
@@ -329,9 +330,10 @@ class MainWidget < Qt::Widget
   end
 
   def delete_mem_list
+    return if @member_list.selectedItems[0].nil?
     member_name = @member_list.selectedItems[0].text
     MemberLog.all.delete_if do |m|
-      (m.first_name + ' ' + m.last_name + ' - ' + m.consumer_number) == member_name
+      "#{m.first_name} #{m.last_name} - #{m.consumer_number}" == member_name
     end
     @member_list.takeItem(@member_list.currentRow)
   end
