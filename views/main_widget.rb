@@ -316,13 +316,17 @@ class MainWidget < Qt::Widget
 
   def delete_preset
     return if @presets.selectedItems[0].nil?
-    yaml_file = YAML.load(File.new('./settings.yml'))
-    all_presets = yaml_file['saved_presets']
-    all_presets.delete_if { |p| p['name'] == @presets.selectedItems[0].text }
 
-    File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
-    @change_preset_name_dialog.close
-    @presets.takeItem(@presets.currentRow)
+    reply = Qt::MessageBox::question self, 'Are you sure?', "Delete preset #{@presets.selectedItems[0].text}?", Qt::MessageBox::Yes, Qt::MessageBox::No
+    if reply == 16384
+      yaml_file = YAML.load(File.new('./settings.yml'))
+      all_presets = yaml_file['saved_presets']
+      all_presets.delete_if { |p| p['name'] == @presets.selectedItems[0].text }
+
+      File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
+      @change_preset_name_dialog.close
+      @presets.takeItem(@presets.currentRow)
+    end
   end
 
   def refresh_mem_list
