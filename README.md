@@ -1,7 +1,6 @@
 TODO -
 
 - extract widgets into separate classes
-- class for handling inputting/updating to text fields/lists
 - class for accessing yaml
 - central place to store constants like path to yaml file
 - layout
