@@ -1,5 +1,6 @@
 class MainWidget < Qt::Widget
-  attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin
+  attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin,
+              :member_type_list, :card_type_list
 
   signals 'clicked()',
           'currentItemChanged()',
@@ -9,12 +10,7 @@ class MainWidget < Qt::Widget
           'update_loading_widget()'
 
   slots 'add_member()',
-        'load_preset()',
         'login()',
-        'save_preset()',
-        'change_preset_name()',
-        'save_preset_name()',
-        'delete_preset()',
         'kill_chrome()',
         'on_show_error(const QString&)',
         'refresh_mem_list()',
@@ -55,17 +51,6 @@ class MainWidget < Qt::Widget
 
     add_mem_button = Qt::PushButton.new 'Add Member', self
     connect(add_mem_button, SIGNAL('clicked()'), self, SLOT('add_member()'))
-
-    save_preset_button = Qt::PushButton.new 'Save Preset', self
-    connect(save_preset_button, SIGNAL('clicked()'), self, SLOT('save_preset()'))
-
-    presets_label = Qt::Label.new 'Presets:', self
-    @presets = Qt::ListWidget.new self
-    YAML.load(File.new './settings.yml')['saved_presets'].each do |preset|
-      item = Qt::ListWidgetItem.new preset['name'], @presets
-    end
-    connect(@presets, SIGNAL('itemClicked(QListWidgetItem *)'), self, SLOT('load_preset()'))
-    connect(@presets, SIGNAL('itemDoubleClicked(QListWidgetItem *)'), self, SLOT('change_preset_name()'))
 
     mem_type_label = Qt::Label.new 'Member Type:', self
     @member_type = Qt::ListWidget.new self
@@ -118,10 +103,8 @@ class MainWidget < Qt::Widget
     layout = Qt::GridLayout.new do |l|
       selectors = Qt::GridLayout.new
 
-      presets = Qt::VBoxLayout.new
-      presets.addWidget presets_label
-      presets.addWidget @presets
-      selectors.addLayout presets, 0, 0, 4, 1
+      presets = PresetsWidget.new self
+      selectors.addWidget presets, 0, 0, 4, 1
 
       mem_type = Qt::VBoxLayout.new
       mem_type.addWidget mem_type_label
@@ -159,7 +142,6 @@ class MainWidget < Qt::Widget
 
       l.addLayout selectors, 0, 0, 5, 4
       l.addLayout buttons, 0, 4, Qt::AlignTop
-      l.addWidget save_preset_button, 5, 4, Qt::AlignBottom
 
       l.addWidget @member_list, 0, 5, 5, 1
       l.addWidget @loading_widget, 0, 6, Qt::AlignTop
@@ -233,99 +215,6 @@ class MainWidget < Qt::Widget
       rescue Exception => e
         emit show_error "#{e}"
       end
-    end
-  end
-
-  def load_preset
-    all_presets = YAML.load(File.new('./settings.yml'))['saved_presets']
-    preset = all_presets.find { |p| p['name'] == @presets.selectedItems[0].text }
-
-    @member_type.setCurrentRow @member_type_list.index preset['member_type']
-    @source_code.text = preset['source_code']
-    @card_type.setCurrentRow @card_type_list.index preset['ccard_type']
-    @card_number.text = preset['ccard_num'].to_s
-    @auth_code.text = preset['auth_code']
-    @web_pin.text = preset['web_pin'].to_s
-  end
-
-  def save_preset
-    yaml_file = YAML.load(File.new('./settings.yml'))
-    all_presets = yaml_file['saved_presets']
-    preset = {}
-    preset['name'] = new_preset_name
-    preset['member_type'] = @member_type.selectedItems[0].text
-    preset['source_code'] = @source_code.text
-    preset['ccard_type'] = @card_type.selectedItems[0].text
-    preset['ccard_num'] = @card_number.text.to_i
-    preset['auth_code'] = @auth_code.text
-    preset['web_pin'] = @web_pin.text.to_i
-
-    all_presets.push preset
-
-    File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
-
-    item = Qt::ListWidgetItem.new preset['name'], @presets
-  end
-
-  def new_preset_name(current_index = 1)
-    all_presets = YAML.load(File.new('./settings.yml'))['saved_presets']
-    if all_presets.any? { |preset| preset['name'] == "new preset #{current_index}" }
-      return new_preset_name(current_index + 1)
-    else
-      return "new preset #{current_index}"
-    end
-  end
-
-  def change_preset_name
-    d = Qt::Dialog.new
-    d.windowTitle = 'Edit preset'
-    @change_preset_name_dialog = d
-
-    input_label = Qt::Label.new 'Name:', d
-
-    input = Qt::LineEdit.new d
-    input.text = @presets.selectedItems[0].text
-    @change_preset_name_input = input
-    btn = Qt::PushButton.new 'Save', d
-    connect(btn, SIGNAL('clicked()'), self, SLOT("save_preset_name()"))
-
-    delete_btn = Qt::PushButton.new 'Delete', d
-    connect(delete_btn, SIGNAL('clicked()'), self, SLOT('delete_preset()'))
-
-    d.layout = Qt::GridLayout.new do |l|
-      l.addWidget input_label, 0, 0
-      l.addWidget input,     0, 1, 1, 2
-      l.addWidget btn,     1, 1
-      l.addWidget delete_btn,  1, 2
-    end
-
-    d.show
-  end
-
-  def save_preset_name
-    new_name = @change_preset_name_input.text
-    yaml_file = YAML.load(File.new('./settings.yml'))
-    all_presets = yaml_file['saved_presets']
-    preset = all_presets.find { |p| p['name'] == @presets.selectedItems[0].text }
-    preset['name'] = new_name
-
-    File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
-    @change_preset_name_dialog.close
-    @presets.selectedItems[0].text = new_name
-  end
-
-  def delete_preset
-    return if @presets.selectedItems[0].nil?
-
-    reply = Qt::MessageBox::question self, 'Are you sure?', "Delete preset #{@presets.selectedItems[0].text}?", Qt::MessageBox::Yes, Qt::MessageBox::No
-    if reply == 16384
-      yaml_file = YAML.load(File.new('./settings.yml'))
-      all_presets = yaml_file['saved_presets']
-      all_presets.delete_if { |p| p['name'] == @presets.selectedItems[0].text }
-
-      File.open('./settings.yml', 'w') { |f| f.write yaml_file.to_yaml }
-      @change_preset_name_dialog.close
-      @presets.takeItem(@presets.currentRow)
     end
   end
 
