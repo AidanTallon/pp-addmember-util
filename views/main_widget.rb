@@ -1,6 +1,5 @@
 class MainWidget < Qt::Widget
-  attr_reader :member_type, :source_code, :card_type, :card_number, :auth_code, :web_pin,
-              :member_type_list, :card_type_list
+  attr_reader :member_opts
 
   signals 'clicked()',
           'currentItemChanged()',
@@ -23,17 +22,17 @@ class MainWidget < Qt::Widget
   def initialize(parent)
     super parent
 
-    @member_type_list = 
+    mem_type_options =
     [
       'Full Member Consumer',
-      'Dummy Associate Consumer', 
-      'Bank Card Consumer', 
+      'Dummy Associate Consumer',
+      'Bank Card Consumer',
       'Associate Consumer',
-        'Bankcard Skeleton Consumer', 
-        'Hybrid Associate Consumer'
+      'Bankcard Skeleton Consumer',
+      'Hybrid Associate Consumer'
     ]
 
-    @card_type_list =
+    card_type_options =
     [
       'MP',
       'MC',
@@ -46,49 +45,44 @@ class MainWidget < Qt::Widget
       'DS'
     ]
 
+    mem_type_label = Qt::Label.new 'Member Type:', self
+    mem_type_list = Qt::ListWidget.new self
+
+    mem_type_options.each do |m|
+      Qt::ListWidgetItem.new m, mem_type_list
+    end
+
+    card_type_label = Qt::Label.new 'Card Type:', self
+    card_type_list = Qt::ListWidget.new self
+
+    card_type_options.each do |c|
+      Qt::ListWidgetItem.new c, card_type_list
+    end
+
+    source_code_label = Qt::Label.new 'Source Code:', self
+    source_code_input = Qt::LineEdit.new self
+
+    card_num_label = Qt::Label.new 'Card Number:', self
+    card_num_input = Qt::LineEdit.new self
+
+    auth_code_label = Qt::Label.new 'Authorisation Code:', self
+    auth_code_input = Qt::LineEdit.new self
+
+    web_pin_label = Qt::Label.new 'Web Pin:', self
+    web_pin_input = Qt::LineEdit.new self
+
+    @member_opts = MemberOptions.new(mem_type_list,
+                                     card_type_list,
+                                     source_code_input,
+                                     card_num_input,
+                                     auth_code_input,
+                                     web_pin_input)
+
     login_button = Qt::PushButton.new 'Just log me in', self
     connect(login_button, SIGNAL('clicked()'), self, SLOT('login()'))
 
     add_mem_button = Qt::PushButton.new 'Add Member', self
     connect(add_mem_button, SIGNAL('clicked()'), self, SLOT('add_member()'))
-
-    mem_type_label = Qt::Label.new 'Member Type:', self
-    @member_type = Qt::ListWidget.new self
-
-    @member_type_list.each do |m|
-      Qt::ListWidgetItem.new m, @member_type
-    end
-
-    @member_type.setCurrentRow 0
-
-    source_code_label = Qt::Label.new 'Source Code:', self
-    @source_code = Qt::LineEdit.new self
-
-    @source_code.text = 'WPUN'
-
-    card_type_label = Qt::Label.new 'Credit Card Type:', self
-    @card_type = Qt::ListWidget.new self
-
-    @card_type_list.each do |c|
-      Qt::ListWidgetItem.new c, @card_type
-    end
-
-    @card_type.setCurrentRow 5
-
-    card_num_label = Qt::Label.new 'Credit Card Number:', self
-    @card_number = Qt::LineEdit.new self
-
-    @card_number.text = '4444333322221111'
-
-    auth_code_label = Qt::Label.new 'Authorisation Code:', self
-    @auth_code = Qt::LineEdit.new self
-
-    @auth_code.text = 'UAT'
-
-    web_pin_label = Qt::Label.new 'Web Pin:', self
-    @web_pin = Qt::LineEdit.new self
-
-    @web_pin.text = '1234'
 
     @member_list = MemberList.new
 
@@ -103,37 +97,37 @@ class MainWidget < Qt::Widget
     layout = Qt::GridLayout.new do |l|
       selectors = Qt::GridLayout.new
 
-      presets = PresetsWidget.new self
+      presets = PresetsWidget.new self, @member_opts
       selectors.addWidget presets, 0, 0, 4, 1
 
       mem_type = Qt::VBoxLayout.new
       mem_type.addWidget mem_type_label
-      mem_type.addWidget @member_type
+      mem_type.addWidget mem_type_list
       selectors.addLayout mem_type, 0, 1, 4, 1
 
       card_type = Qt::VBoxLayout.new
       card_type.addWidget card_type_label
-      card_type.addWidget @card_type
+      card_type.addWidget card_type_list
       selectors.addLayout card_type, 0, 2, 4, 1
 
       source_code = Qt::VBoxLayout.new
       source_code.addWidget source_code_label
-      source_code.addWidget @source_code
+      source_code.addWidget source_code_input
       selectors.addLayout source_code, 0, 3, Qt::AlignTop
 
       card_num = Qt::VBoxLayout.new
       card_num.addWidget card_num_label
-      card_num.addWidget @card_number
+      card_num.addWidget card_num_input
       selectors.addLayout card_num, 1, 3, Qt::AlignTop
 
       auth_code = Qt::VBoxLayout.new
       auth_code.addWidget auth_code_label
-      auth_code.addWidget @auth_code
+      auth_code.addWidget auth_code_input
       selectors.addLayout auth_code, 2, 3, Qt::AlignTop
 
       web_pin = Qt::VBoxLayout.new
       web_pin.addWidget web_pin_label
-      web_pin.addWidget @web_pin
+      web_pin.addWidget web_pin_input
       selectors.addLayout web_pin, 3, 3, Qt::AlignTop
 
       buttons = Qt::VBoxLayout.new
@@ -160,12 +154,12 @@ class MainWidget < Qt::Widget
   end
 
   def add_member
-    mem   = @member_type.selectedItems[0].text
-    scode = @source_code.text
-    ctype = @card_type.selectedItems[0].text
-    cnum  = @card_number.text
-    acode = @auth_code.text
-    wpin  = @web_pin.text
+    mem   = @member_opts.read_member_type
+    scode = @member_opts.read_source_code
+    ctype = @member_opts.read_card_type
+    cnum  = @member_opts.read_card_number
+    acode = @member_opts.read_auth_code
+    wpin  = @member_opts.read_web_pin
 
     username = EnvConfig.user['username']
     password = EnvConfig.user['password']

@@ -8,8 +8,11 @@ class PresetsWidget < Qt::Widget
         'delete_preset()',
         'save_preset()'
 
-  def initialize(parent)
-    super
+  def initialize(parent, member_opts)
+    super parent
+
+    @member_opts = member_opts
+
     label = Qt::Label.new 'Presets:', self
     @list = Qt::ListWidget.new self
     YAML.load(File.new './settings.yml')['saved_presets'].each do |preset|
@@ -34,12 +37,12 @@ class PresetsWidget < Qt::Widget
     all_presets = YAML.load(File.new('./settings.yml'))['saved_presets']
     preset = all_presets.find { |p| p['name'] == @list.selectedItems[0].text }
 
-    parent.member_type.setCurrentRow parent.member_type_list.index preset['member_type']
-    parent.source_code.text = preset['source_code']
-    parent.card_type.setCurrentRow parent.card_type_list.index preset['ccard_type']
-    parent.card_number.text = preset['ccard_num'].to_s
-    parent.auth_code.text = preset['auth_code']
-    parent.web_pin.text = preset['web_pin'].to_s
+    @member_opts.set_member_type preset['member_type']
+    @member_opts.set_source_code preset['source_code']
+    @member_opts.set_card_type preset['ccard_type']
+    @member_opts.set_card_number preset['ccard_num'].to_s
+    @member_opts.set_auth_code preset['auth_code']
+    @member_opts.set_web_pin preset['web_pin'].to_s
   end
 
   def save_preset
@@ -47,12 +50,12 @@ class PresetsWidget < Qt::Widget
     all_presets = yaml_file['saved_presets']
     preset = {}
     preset['name'] = new_preset_name
-    preset['member_type'] = parent.member_type.selectedItems[0].text
-    preset['source_code'] = parent.source_code.text
-    preset['ccard_type'] = parent.card_type.selectedItems[0].text
-    preset['ccard_num'] = parent.card_number.text.to_i
-    preset['auth_code'] = parent.auth_code.text
-    preset['web_pin'] = parent.web_pin.text.to_i
+    preset['member_type'] = @member_opts.read_member_type
+    preset['source_code'] = @member_opts.read_source_code
+    preset['ccard_type'] = @member_opts.read_card_type
+    preset['ccard_num'] = @member_opts.read_card_number.to_i
+    preset['auth_code'] = @member_opts.read_auth_code
+    preset['web_pin'] = @member_opts.read_web_pin.to_i
 
     all_presets.push preset
 
@@ -64,7 +67,7 @@ class PresetsWidget < Qt::Widget
   def new_preset_name(current_index = 1)
     all_presets = YAML.load(File.new('./settings.yml'))['saved_presets']
     if all_presets.any? { |preset| preset['name'] == "new preset #{current_index}" }
-      return new_preset_name(urrent_index + 1)
+      return new_preset_name(current_index + 1)
     else
       return "new preset #{current_index}"
     end
