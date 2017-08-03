@@ -9,3 +9,4 @@ TODO -
 - kill specific chrome process from window
 - better way of viewing details of added member
 - prevent interaction with main widget when dialogs open
+- error handling when adding member with empty fields
