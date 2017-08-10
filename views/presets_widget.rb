@@ -30,6 +30,11 @@ class PresetsWidget < Qt::Widget
       l.addWidget save_btn
     end
 
+    if @list.count > 0
+      @list.currentRow = 0
+      load_preset
+    end
+
     setLayout layout
   end
 
