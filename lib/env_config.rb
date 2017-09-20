@@ -11,7 +11,8 @@ class EnvConfig
         {
           'env' =>
           {
-            'url' => ''
+            'url' => '',
+            'saved_urls' => []
           },
           'user' =>
           {
@@ -38,9 +39,16 @@ class EnvConfig
     @yaml_data['env']['url']
   end
 
+  def self.saved_urls
+    @yaml_data['env']['saved_urls']
+  end
+
   def self.save_url(url)
     @yaml_data = YAML.load(File.new(@path))
     @yaml_data['env']['url'] = url
+    unless  @yaml_data['env']['saved_urls'].include? url
+      @yaml_data['env']['saved_urls'] << url
+    end
     File.open(@path, 'w') { |f| f.write @yaml_data.to_yaml }
   end
 end

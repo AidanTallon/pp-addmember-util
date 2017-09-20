@@ -18,6 +18,10 @@ class ConfigDialog < Qt::Dialog
     @urlInput = Qt::LineEdit.new self
     @urlInput.text = EnvConfig.url rescue ''
 
+    url_completer = Qt::Completer.new EnvConfig.saved_urls, self
+
+    @urlInput.setCompleter url_completer
+
     @saveButton = Qt::PushButton.new 'Save', self
     connect(@saveButton, SIGNAL('clicked()'), self, SLOT('saveConfig()'))
 

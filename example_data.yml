@@ -1,6 +1,9 @@
 ---
 env:
   url: https://website-url.com/ppass/
+  saved_urls:
+    - https://www.google.com/
+    - https://www.hotmail.com/
 user:
   username: username
   password: password
