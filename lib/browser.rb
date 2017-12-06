@@ -19,9 +19,9 @@ class Browser
     @driver.goto @url + 'fw1/index.cfm?action=member.addBasicDetails&mode=1'
 
     @driver.select_list(id: 'consumertypeid').select member_type
-    first_name = 'TestUser'
+    first_name = 'Test'
     @driver.text_field(id: 'forename').set first_name
-    last_name = RandomWordGenerator.word
+    last_name = 'User'
     @driver.text_field(id: 'surname').set last_name
     @driver.text_field(id: 'countrycode').set 'UK'
     @driver.text_field(id: 'originalsourcecode').set source_code
