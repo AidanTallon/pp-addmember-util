@@ -59,6 +59,15 @@ class MainWidget < Qt::Widget
       Qt::ListWidgetItem.new c, card_type_list
     end
 
+    first_name_label = Qt::Label.new 'First Name:', self
+    first_name_input = Qt::LineEdit.new self
+
+    last_name_label = Qt::Label.new 'Last Name:', self
+    last_name_input = Qt::LineEdit.new self
+
+    randomize_label = Qt::Label.new 'Randomize last name?', self
+    randomize_checkbox = Qt::CheckBox.new self
+
     source_code_label = Qt::Label.new 'Source Code:', self
     source_code_input = Qt::LineEdit.new self
 
@@ -98,37 +107,52 @@ class MainWidget < Qt::Widget
       selectors = Qt::GridLayout.new
 
       presets = PresetsWidget.new self, @member_opts
-      selectors.addWidget presets, 0, 0, 4, 1
+      selectors.addWidget presets, 0, 0, 6, 1
 
       mem_type = Qt::VBoxLayout.new
       mem_type.addWidget mem_type_label
       mem_type.addWidget mem_type_list
-      selectors.addLayout mem_type, 0, 1, 4, 1
+      selectors.addLayout mem_type, 0, 1, 6, 1
 
       card_type = Qt::VBoxLayout.new
       card_type.addWidget card_type_label
       card_type.addWidget card_type_list
-      selectors.addLayout card_type, 0, 2, 4, 1
+      selectors.addLayout card_type, 0, 2, 6, 1
+
+      first_name = Qt::VBoxLayout.new
+      first_name.addWidget first_name_label
+      first_name.addWidget first_name_input
+      selectors.addLayout first_name, 0, 3, Qt::AlignTop
+
+      last_name = Qt::VBoxLayout.new
+      last_name.addWidget last_name_label
+      last_name.addWidget last_name_input
+      selectors.addLayout last_name, 1, 3, Qt::AlignTop
+
+      randomize = Qt::VBoxLayout.new
+      randomize.addWidget randomize_label
+      randomize.addWidget randomize_checkbox
+      selectors.addLayout randomize, 1, 4, Qt::AlignTop
 
       source_code = Qt::VBoxLayout.new
       source_code.addWidget source_code_label
       source_code.addWidget source_code_input
-      selectors.addLayout source_code, 0, 3, Qt::AlignTop
+      selectors.addLayout source_code, 2, 3, Qt::AlignTop
 
       card_num = Qt::VBoxLayout.new
       card_num.addWidget card_num_label
       card_num.addWidget card_num_input
-      selectors.addLayout card_num, 1, 3, Qt::AlignTop
+      selectors.addLayout card_num, 3, 3, Qt::AlignTop
 
       auth_code = Qt::VBoxLayout.new
       auth_code.addWidget auth_code_label
       auth_code.addWidget auth_code_input
-      selectors.addLayout auth_code, 2, 3, Qt::AlignTop
+      selectors.addLayout auth_code, 4, 3, Qt::AlignTop
 
       web_pin = Qt::VBoxLayout.new
       web_pin.addWidget web_pin_label
       web_pin.addWidget web_pin_input
-      selectors.addLayout web_pin, 3, 3, Qt::AlignTop
+      selectors.addLayout web_pin, 5, 3, Qt::AlignTop
 
       buttons = Qt::VBoxLayout.new
       buttons.addWidget login_button
