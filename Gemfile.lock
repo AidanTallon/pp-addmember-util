@@ -1,8 +1,9 @@
 GEM
-  remote: https://rubygems.org/
+  remote: http://rubygems.org/
   specs:
     childprocess (0.7.0)
       ffi (~> 1.0, >= 1.0.11)
+    clipboard (1.1.1)
     ffi (1.9.18-x64-mingw32)
     qtbindings (4.8.6.3-x64-mingw32)
       qtbindings-qt (~> 4.8.6.0)
@@ -25,9 +26,11 @@ PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
+  clipboard
+  ffi
   qtbindings
   random-word-generator
   watir
 
 BUNDLED WITH
-   1.15.1
+   1.16.0

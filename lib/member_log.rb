@@ -9,4 +9,12 @@ class MemberLog
   def self.all
     @@all ||= []
   end
+
+  def info
+    s =  "Consumer Number: #{@consumer_number}\n"
+    s += "Source Code: #{@source_code}\n"
+    s += "Membership Number: #{@membership_number}\n"
+    s += "External Identifier: #{@external_identifier}\n"
+    s += "Web Pin: #{@web_pin}\n"
+  end
 end

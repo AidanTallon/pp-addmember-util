@@ -15,7 +15,8 @@ class MainWidget < Qt::Widget
         'refresh_mem_list()',
         'delete_mem_list()',
         'clear_mem_list()',
-        'on_update_loading_widget()'
+        'on_update_loading_widget()',
+        'copy_mem_list()'
 
   @lock = Mutex.new
 
@@ -86,6 +87,9 @@ class MainWidget < Qt::Widget
 
     @member_list = MemberList.new
 
+    @copy_to_clipboard_button = Qt::PushButton.new 'Copy to Clipboard', self
+    connect(@copy_to_clipboard_button, SIGNAL('clicked()'), self, SLOT('copy_mem_list()'))
+
     @clear_mem_list_button = Qt::PushButton.new 'Clear', self
     connect(@clear_mem_list_button, SIGNAL('clicked()'), self, SLOT('clear_mem_list()'))
 
@@ -140,6 +144,7 @@ class MainWidget < Qt::Widget
       l.addWidget @member_list, 0, 5, 5, 1
       l.addWidget @loading_widget, 0, 6, Qt::AlignTop
       @loading_widget.hide
+      l.addWidget @copy_to_clipboard_button, 2, 6
       l.addWidget @delete_mem_list_button, 3, 6
       l.addWidget @clear_mem_list_button, 4, 6
     end
@@ -214,6 +219,16 @@ class MainWidget < Qt::Widget
 
   def refresh_mem_list
     @member_list.refresh
+  end
+
+  def copy_mem_list
+    # TODO copy to clipboard
+    members_string = ''
+    MemberLog.all.each do |m|
+      members_string += m.info + "\n" unless m.consumer_number.nil?
+    end
+
+    Clipboard.copy members_string
   end
 
   def delete_mem_list
