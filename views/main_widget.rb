@@ -178,7 +178,7 @@ class MainWidget < Qt::Widget
         begin
           Browser.new(url).login(username, password).add_member(mem, scode, wpin, ctype, cnum, acode, member)
         rescue Exception => e
-          emit show_error "#{e}"
+          emit show_error "#{e}\n#{e.backtrace}"
         end
 
         emit update_mem_list()

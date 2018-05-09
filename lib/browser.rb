@@ -12,6 +12,7 @@ class Browser
     @driver.frame(name: 'ContentFrame').frame(name: 'ActiveAreaFrame').text_field(type: 'password').set(pass)
     @driver.frame(name: 'ContentFrame').frame(name: 'ActiveAreaFrame').text_field(type: 'password').send_keys :enter
     raise ArgumentError, 'Error logging in' if @driver.alert.exists?
+    sleep 2
     return self
   end
 
@@ -24,8 +25,8 @@ class Browser
     last_name = 'User'
     @driver.text_field(id: 'surname').set last_name
     @driver.text_field(id: 'countrycode').set 'UK'
-    @driver.text_field(id: 'originalsourcecode').set source_code
-    @driver.text_field(id: 'originalsourcecode').send_keys :enter
+    @driver.text_field(id: 'originalSourceCode').set source_code
+    @driver.text_field(id: 'originalSourceCode').send_keys :enter
 
     @driver.goto @url + 'fw1/index.cfm?action=member.addAddressDetails'
 
@@ -54,7 +55,11 @@ class Browser
       member_obj.auth_code = auth_code
       member_obj.first_name = first_name
       member_obj.last_name = last_name
-      member_obj.consumer_number = @driver.frame(name: 'MessageFrame').span(id: 'CurrentConsumerText').text.split(' ')[0]
+
+      screen = BasicsDetailsTable.new @driver
+      member_obj.consumer_number = screen.consumer_number
+      member_obj.membership_number = screen.membership_number
+      member_obj.external_identifier = screen.external_identifier
     end
 
     return self

@@ -13,6 +13,6 @@ class MemberList < Qt::ListWidget
 
   def add_member(member)
     item = Qt::ListWidgetItem.new member.first_name + ' ' + member.last_name + ' - ' + member.consumer_number, self
-    item.toolTip = "Member Type: #{member.member_type}\nSource Code: #{member.source_code}\nAuth Code: #{member.auth_code}\nWeb Pin: #{member.web_pin}"
+    item.toolTip = "Membership Number: #{member.membership_number}\nExternal Identifier: #{member.external_identifier}\nMember Type: #{member.member_type}\nSource Code: #{member.source_code}\nAuth Code: #{member.auth_code}\nWeb Pin: #{member.web_pin}"
   end
 end
