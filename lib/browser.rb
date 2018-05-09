@@ -22,7 +22,7 @@ class Browser
     @driver.select_list(id: 'consumertypeid').select member_type
     first_name = 'Test'
     @driver.text_field(id: 'forename').set first_name
-    last_name = 'User'
+    last_name = RandomWordGenerator.word
     @driver.text_field(id: 'surname').set last_name
     @driver.text_field(id: 'countrycode').set 'UK'
     @driver.text_field(id: 'originalSourceCode').set source_code
