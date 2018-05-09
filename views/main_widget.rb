@@ -222,7 +222,6 @@ class MainWidget < Qt::Widget
   end
 
   def copy_mem_list
-    # TODO copy to clipboard
     members_string = ''
     MemberLog.all.each do |m|
       members_string += m.info + "\n" unless m.consumer_number.nil?
